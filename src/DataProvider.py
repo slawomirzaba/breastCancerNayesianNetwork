@@ -1,8 +1,8 @@
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.model_selection import train_test_split
 import os
 import csv
 import constants
-from sklearn.feature_extraction import DictVectorizer
-from sklearn.model_selection import train_test_split
 
 class DataProvider:
     def __init__(self, test_size):
