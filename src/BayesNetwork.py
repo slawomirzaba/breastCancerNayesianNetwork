@@ -32,7 +32,7 @@ class BayesNetwork():
         predictions = []
 
         for sample in x_test:
-            mapped_sample = dict(zip(self.state_names[:-1], sample))
+            mapped_sample = dict(zip(self.state_names[1:], sample))
             beliefs = self.model.predict_proba(mapped_sample, check_input=False)
             graph = dict(zip([state.name for state in self.model.states], beliefs))
             label_probabilities = graph['label'].parameters[0]
