@@ -1,5 +1,7 @@
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import train_test_split
+from weka.core.converters import Loader
+from weka.filters import Filter
 import os
 import csv
 import constants
@@ -9,7 +11,7 @@ class DataProvider:
         self.test_size = test_size
 
     def get_training_data(self):
-        cancer_bread_data = self.get_all_breast_cancer_data()
+        cancer_bread_data = self.__get_all_breast_cancer_data()
         data = cancer_bread_data['data'];
         target = cancer_bread_data['target'];
         feature_names = cancer_bread_data['feature_names'];
@@ -22,7 +24,30 @@ class DataProvider:
             "feature_names": feature_names
         }
 
-    def get_all_breast_cancer_data(self):
+    def get_weka_training_data(self):
+        percentage_of_train_set = str(self.test_size * 100)
+        options_for_train_set = ["-P", percentage_of_train_set]
+        options_for_test_set = ["-P", percentage_of_train_set, "-V"]
+        remove_percentage_filter_class = "weka.filters.unsupervised.instance.RemovePercentage"
+        loader = Loader(classname="weka.core.converters.CSVLoader")
+        dataset = loader.load_file(os.path.join(constants.BASE_DIR, constants.BREAST_CANCER_FILE_NAME))
+        dataset.class_is_last()
+
+        filter_for_train_set = Filter(classname=remove_percentage_filter_class, options=options_for_train_set)
+        filter_for_train_set.inputformat(dataset)
+        train_set = filter_for_train_set.filter(dataset)
+
+        filter_for_test_set = Filter(classname=remove_percentage_filter_class, options=options_for_test_set)
+        filter_for_test_set.inputformat(dataset)
+        test_set = filter_for_test_set.filter(dataset)
+
+        return {
+            'train_set': train_set,
+            'test_set': test_set,
+            'labels': dataset.class_attribute.values
+        }
+
+    def __get_all_breast_cancer_data(self):
         data = []
         target = []
         bool_map = {'yes': 1, 'no': 0, 'nan': 0}

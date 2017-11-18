@@ -3,28 +3,28 @@ from matplotlib import pyplot
 from sklearn.feature_extraction import DictVectorizer
 from sklearn import preprocessing
 from copy import deepcopy
-from constants import ALGHORITHM_TYPES
+from constants import SIMPLE_ALGORITHMS
 import numpy
 import networkx
 
-class BayesNetwork():
-    def __init__(self, feature_names, algorithm):
-        if algorithm not in ALGHORITHM_TYPES.values():
+class SimpleBayesNetwork():
+    def __init__(self, feature_names, algorithm_name):
+        if algorithm_name not in SIMPLE_ALGORITHMS.values():
             raise Exception('Unsupported algorithm!!')
 
-        self.algorithm = algorithm
+        self.algorithm_name = algorithm_name
         self.state_names = deepcopy(feature_names)
         self.state_names.insert(0, "label")
         self.labelEncoder = preprocessing.LabelEncoder()
         self.formatted_labels, self.model = None, None
 
-    def train_and_test_bayes(self, x_train, y_train):
+    def train_bayes(self, x_train, y_train):
         self.__format_labels(y_train)
         X = numpy.concatenate((self.formatted_labels, x_train), axis=1)
         self.model = {
-            ALGHORITHM_TYPES['chowLiu']: self.__chowLiu_algorithm,
-            ALGHORITHM_TYPES['naive']: self.__naive_algorithm
-        }[self.algorithm](X)
+            SIMPLE_ALGORITHMS['chowLiu']: self.__chowLiu_algorithm,
+            SIMPLE_ALGORITHMS['naive']: self.__naive_algorithm
+        }[self.algorithm_name](X)
 
     def predict_and_compare(self, x_test, y_test):
         if not self.model:
@@ -49,13 +49,13 @@ class BayesNetwork():
         pyplot.show()
 
     def __chowLiu_algorithm(self, X):
-        return BayesianNetwork.from_samples(X, algorithm=self.algorithm, state_names=self.state_names, root=0)
+        return BayesianNetwork.from_samples(X, algorithm=self.algorithm_name, state_names=self.state_names, root=0)
 
     def __naive_algorithm(self, X):
         graph = networkx.DiGraph()
         for i in range(1, len(self.state_names)):
             graph.add_edge((0,), (i,))
-        return BayesianNetwork.from_samples(X, algorithm='exact', state_names=self.state_names, root=0,
+        return BayesianNetwork.from_samples(X, algorithm=self.algorithm_name, state_names=self.state_names, root=0,
                                             constraint_graph=graph)
 
     def __get_compare_results(self, predictions, correct_results):
