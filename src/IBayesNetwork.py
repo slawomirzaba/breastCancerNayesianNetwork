@@ -10,7 +10,7 @@ class IBayesNetwork():
 		self.model = None
 		self.algorithm_name = algorithm_data['name']
 
-	def __get_compare_results(self, predictions, correct_results):
+	def get_compare_results(self, predictions, correct_results):
 		correct_recurrences = correct_no_recurrences = incorrect_recurrences = incorrect_no_recurrences = 0
 
 		for x,y in zip(correct_results, predictions):

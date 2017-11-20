@@ -29,7 +29,7 @@ class WekaBayesNetwork(IBayesNetwork):
         for _, inst in enumerate(test_set):
             predictions.append(self.labels[int(self.model.classify_instance(inst))])
 
-        return self.__get_compare_results(predictions, y_test)
+        return self.get_compare_results(predictions, y_test)
 
     def draw_graph(self):
         if not self.model:
@@ -43,5 +43,5 @@ class WekaBayesNetwork(IBayesNetwork):
         plot_graph.plot_dot_graph(file_name)
         os.remove(file_name)
 
-    def __get_compare_results(self, predictions, correct_results):
-        return super().__get_compare_results(predictions, correct_results)
+    def get_compare_results(self, predictions, correct_results):
+        return super().get_compare_results(predictions, correct_results)

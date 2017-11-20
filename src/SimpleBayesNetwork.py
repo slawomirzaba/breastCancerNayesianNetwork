@@ -40,7 +40,7 @@ class SimpleBayesNetwork(IBayesNetwork):
             label_probabilities = graph['label'].parameters[0]
             predictions.append(self.labelEncoder.classes_[self.__get_probable_class(label_probabilities)])
 
-        return self.__get_compare_results(predictions, y_test)
+        return self.get_compare_results(predictions, y_test)
 
     def draw_graph(self):
         if not self.model:
@@ -60,8 +60,8 @@ class SimpleBayesNetwork(IBayesNetwork):
         return BayesianNetwork.from_samples(X, algorithm=self.algorithm_name, state_names=self.state_names, root=0,
                                             constraint_graph=graph)
 
-    def __get_compare_results(self, predictions, correct_results):
-        return super().__get_compare_results(predictions, correct_results)
+    def get_compare_results(self, predictions, correct_results):
+        return super().get_compare_results(predictions, correct_results)
 
     def __get_probable_class(self, probabilites):
         values = list(probabilites.values())
