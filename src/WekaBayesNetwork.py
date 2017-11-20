@@ -1,15 +1,17 @@
 from constants import WEKA_ALGORITHMS
 from weka.classifiers import Classifier
+from IBayesNetwork import IBayesNetwork
 import weka.plot.graph as graph
 
-class WekaBayesNetwork():
-    def __init__(self, labels, algorithm_name):
-        if algorithm_name not in WEKA_ALGORITHMS.values():
-            raise Exception('Unsupported algorithm!!')
 
-        self.algorithm_name = algorithm_name
+class WekaBayesNetwork(IBayesNetwork):
+    def __init__(self, labels, algorithm_name):
+        super().__init__(algorithm_name)
+        
+        if algorithm_name not in WEKA_ALGORITHMS.values():
+            raise Exception('Unsupported algorithm in WEKA_ALGORITHMS!!')
+
         self.labels = labels
-        self.model = None
 
     def train_bayes(self, train_set):
         self.model = Classifier(classname="weka.classifiers.bayes.net.BayesNetGenerator")
@@ -18,7 +20,7 @@ class WekaBayesNetwork():
 
     def predict_and_compare(self, test_set):
         if not self.model:
-            raise Exception('Model must be builded!!')
+            raise Exception('Model must be built!!')
 
         predictions = []
         y_test = [sample.get_string_value(sample.class_index) for _, sample in enumerate(test_set)]
@@ -29,26 +31,9 @@ class WekaBayesNetwork():
 
     def draw_graph(self):
         if not self.model:
-            raise Exception('Model must be builded!!')
+            raise Exception('Model must be built!!')
 
         # graph.plot_dot_graph(self.model.graph) drawing graph not working
 
     def __get_compare_results(self, predictions, correct_results):
-        correct_recurrences = correct_no_recurrences = incorrect_recurrences = incorrect_no_recurrences = 0
-
-        for x,y in zip(correct_results, predictions):
-            if x=='recurrence-events' and y=='recurrence-events':
-                correct_recurrences += 1
-            elif x=='no-recurrence-events' and y=='no-recurrence-events':
-                correct_no_recurrences += 1
-            elif x=='recurrence-events' and y=='no-recurrence-events':
-                incorrect_recurrences += 1
-            else:
-                incorrect_no_recurrences += 1
-
-        return {
-            'correct_recurrences': correct_recurrences,
-            'correct_no_recurrences': correct_no_recurrences,
-            'incorrect_recurrences': incorrect_recurrences,
-            'incorrect_no_recurrences': incorrect_no_recurrences
-        }
+        return super().__get_compare_results(predictions, correct_results)

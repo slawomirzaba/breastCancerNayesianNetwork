@@ -4,19 +4,22 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn import preprocessing
 from copy import deepcopy
 from constants import SIMPLE_ALGORITHMS
+from IBayesNetwork import IBayesNetwork
 import numpy
 import networkx
 
-class SimpleBayesNetwork():
-    def __init__(self, feature_names, algorithm_name):
-        if algorithm_name not in SIMPLE_ALGORITHMS.values():
-            raise Exception('Unsupported algorithm!!')
 
-        self.algorithm_name = algorithm_name
+class SimpleBayesNetwork(IBayesNetwork):
+    def __init__(self, feature_names, algorithm_name):
+        super().__init__(algorithm_name)
+        
+        if algorithm_name not in SIMPLE_ALGORITHMS.values():
+            raise Exception('Unsupported algorithm in SIMPLE_ALGORITHMS!!')
+
         self.state_names = deepcopy(feature_names)
         self.state_names.insert(0, "label")
         self.labelEncoder = preprocessing.LabelEncoder()
-        self.formatted_labels, self.model = None, None
+        self.formatted_labels = None
 
     def train_bayes(self, x_train, y_train):
         self.__format_labels(y_train)
@@ -28,7 +31,7 @@ class SimpleBayesNetwork():
 
     def predict_and_compare(self, x_test, y_test):
         if not self.model:
-            raise Exception('Model must be builded!!')
+            raise Exception('Model must be built!!')
         predictions = []
 
         for sample in x_test:
@@ -42,7 +45,7 @@ class SimpleBayesNetwork():
 
     def draw_graph(self):
         if not self.model:
-            raise Exception('Model must be builded!!')
+            raise Exception('Model must be built!!')
 
         pyplot.figure()
         self.model.plot()
@@ -59,24 +62,7 @@ class SimpleBayesNetwork():
                                             constraint_graph=graph)
 
     def __get_compare_results(self, predictions, correct_results):
-        correct_recurrences = correct_no_recurrences = incorrect_recurrences = incorrect_no_recurrences = 0
-
-        for x,y in zip(correct_results, predictions):
-            if x=='recurrence-events' and y=='recurrence-events':
-                correct_recurrences += 1
-            elif x=='no-recurrence-events' and y=='no-recurrence-events':
-                correct_no_recurrences += 1
-            elif x=='recurrence-events' and y=='no-recurrence-events':
-                incorrect_recurrences += 1
-            else:
-                incorrect_no_recurrences += 1
-
-        return {
-            'correct_recurrences': correct_recurrences,
-            'correct_no_recurrences': correct_no_recurrences,
-            'incorrect_recurrences': incorrect_recurrences,
-            'incorrect_no_recurrences': incorrect_no_recurrences
-        }
+        return super().__get_compare_results(predictions, correct_results)
 
     def __get_probable_class(self, probabilites):
         values = list(probabilites.values())
