@@ -1,6 +1,5 @@
 from pomegranate import BayesianNetwork
 from matplotlib import pyplot
-from sklearn.feature_extraction import DictVectorizer
 from sklearn import preprocessing
 from copy import deepcopy
 from constants import SIMPLE_ALGORITHMS
@@ -8,11 +7,8 @@ import numpy
 import networkx
 
 class SimpleBayesNetwork():
-    def __init__(self, feature_names, algorithm_name):
-        if algorithm_name not in SIMPLE_ALGORITHMS.values():
-            raise Exception('Unsupported algorithm!!')
-
-        self.algorithm_name = algorithm_name
+    def __init__(self, feature_names, algorithm_data):
+        self.algorithm_name = algorithm_data['name']
         self.state_names = deepcopy(feature_names)
         self.state_names.insert(0, "label")
         self.labelEncoder = preprocessing.LabelEncoder()
@@ -22,8 +18,8 @@ class SimpleBayesNetwork():
         self.__format_labels(y_train)
         X = numpy.concatenate((self.formatted_labels, x_train), axis=1)
         self.model = {
-            SIMPLE_ALGORITHMS['chowLiu']: self.__chowLiu_algorithm,
-            SIMPLE_ALGORITHMS['naive']: self.__naive_algorithm
+            SIMPLE_ALGORITHMS['chowLiu']['name']: self.__chowLiu_algorithm,
+            SIMPLE_ALGORITHMS['naive']['name']: self.__naive_algorithm
         }[self.algorithm_name](X)
 
     def predict_and_compare(self, x_test, y_test):

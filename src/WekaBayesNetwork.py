@@ -1,19 +1,19 @@
 from constants import WEKA_ALGORITHMS
-from weka.classifiers import Classifier
-import weka.plot.graph as graph
+from weka.core.classes import from_commandline
+from xml_to_dot import parse_xml_to_dot
+import weka.plot.graph as plot_graph
+import os
 
 class WekaBayesNetwork():
-    def __init__(self, labels, algorithm_name):
-        if algorithm_name not in WEKA_ALGORITHMS.values():
-            raise Exception('Unsupported algorithm!!')
-
-        self.algorithm_name = algorithm_name
+    def __init__(self, labels, algorithm_data):
+        self.cmdline = 'weka.classifiers.bayes.BayesNet -D -Q weka.classifiers.bayes.net.search.local.{} -- {} -S BAYES -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5'
+        self.cmdline = self.cmdline.format(algorithm_data['name'], algorithm_data['parameters'])
+        self.algorithm_name = algorithm_data['name'];
         self.labels = labels
         self.model = None
 
     def train_bayes(self, train_set):
-        self.model = Classifier(classname="weka.classifiers.bayes.net.BayesNetGenerator")
-        self.model.options = ['-Q', 'weka.classifiers.bayes.net.search.local.{}'.format(self.algorithm_name)]
+        self.model = from_commandline(self.cmdline, classname="weka.classifiers.Classifier")
         self.model.build_classifier(train_set)
 
     def predict_and_compare(self, test_set):
@@ -28,10 +28,13 @@ class WekaBayesNetwork():
         return self.__get_compare_results(predictions, y_test)
 
     def draw_graph(self):
-        if not self.model:
-            raise Exception('Model must be builded!!')
-
-        # graph.plot_dot_graph(self.model.graph) drawing graph not working
+        file_name = '{}.dot'.format(self.algorithm_name)
+        dot_file_content = parse_xml_to_dot(self.model.graph)
+        file = open(file_name, 'w')
+        file.write(dot_file_content)
+        file.close()
+        plot_graph.plot_dot_graph(file_name)
+        os.remove(file_name)
 
     def __get_compare_results(self, predictions, correct_results):
         correct_recurrences = correct_no_recurrences = incorrect_recurrences = incorrect_no_recurrences = 0

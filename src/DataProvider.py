@@ -1,7 +1,7 @@
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import train_test_split
 from weka.core.converters import Loader
-from weka.filters import Filter
+from weka.core.classes import Random
 import os
 import csv
 import constants
@@ -25,21 +25,11 @@ class DataProvider:
         }
 
     def get_weka_training_data(self):
-        percentage_of_train_set = str(self.test_size * 100)
-        options_for_train_set = ["-P", percentage_of_train_set]
-        options_for_test_set = ["-P", percentage_of_train_set, "-V"]
-        remove_percentage_filter_class = "weka.filters.unsupervised.instance.RemovePercentage"
+        percentage_of_train_set = 100 - self.test_size * 100
         loader = Loader(classname="weka.core.converters.CSVLoader")
         dataset = loader.load_file(os.path.join(constants.BASE_DIR, constants.BREAST_CANCER_FILE_NAME))
         dataset.class_is_last()
-
-        filter_for_train_set = Filter(classname=remove_percentage_filter_class, options=options_for_train_set)
-        filter_for_train_set.inputformat(dataset)
-        train_set = filter_for_train_set.filter(dataset)
-
-        filter_for_test_set = Filter(classname=remove_percentage_filter_class, options=options_for_test_set)
-        filter_for_test_set.inputformat(dataset)
-        test_set = filter_for_test_set.filter(dataset)
+        train_set, test_set = dataset.train_test_split(percentage_of_train_set, Random(1))
 
         return {
             'train_set': train_set,
